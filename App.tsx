@@ -1,11 +1,33 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission
+} from "react-native-vision-camera";
+import NoCameraDeviceError from "./screens/NoCameraDeviceError";
+import PermissionsPage from "./screens/PermissionsPage";
 
 export default function App() {
+  const device = useCameraDevice("front");
+  const { hasPermission, requestPermission } = useCameraPermission();
+
+  useEffect(() => {
+    if (!hasPermission) {
+      requestPermission();
+    }
+  }, []);
+
+  if (!hasPermission) return <PermissionsPage />;
+  if (device == null) return <NoCameraDeviceError />;
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device!}
+        isActive={true}
+      />
     </View>
   );
 }
@@ -13,8 +35,5 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
